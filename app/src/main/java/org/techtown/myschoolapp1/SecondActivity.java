@@ -7,12 +7,17 @@ import androidx.fragment.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.techtown.myschoolapp1.Fragment.FragHome;
 import org.techtown.myschoolapp1.Fragment.FragSearch;
 import org.techtown.myschoolapp1.Fragment.FragSettings;
+
+import java.util.ArrayList;
 
 public class SecondActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
@@ -44,11 +49,12 @@ public class SecondActivity extends AppCompatActivity {
                        else if(item.getItemId() == R.id.search) {
                            getSupportFragmentManager().beginTransaction().replace(R.id.second_layout, fragment_search).commit();
                        }
+                       else if(item.getItemId() == R.id.home) {
+                           getSupportFragmentManager().beginTransaction().replace(R.id.second_layout, fragment_home).commit();
+                       }
                         return  true;
                     }
                 }
         );
-
-
     }
 }
