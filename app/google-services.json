@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "994796398938",
+    "project_id": "schoolappproject-1",
+    "storage_bucket": "schoolappproject-1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:994796398938:android:1c2cdb80c06691bdd42b63",
+        "android_client_info": {
+          "package_name": "org.techtown.myschoolapp1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsja0etyTq3BRVd0UK9AY0wX_dPxe2nlA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
