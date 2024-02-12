@@ -44,7 +44,8 @@ public class MyDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        onCreate(db);
     }
 
     // OpenAPI로부터 받은 데이터를 SQLite에 삽입하는 메서드
@@ -116,4 +117,9 @@ public class MyDBHelper extends SQLiteOpenHelper {
         db.close();
         return dataList;
     }
+
+
+
+    // DB에서 삭제
+
 }

@@ -77,4 +77,7 @@ public class MyAdapter extends BaseAdapter {
         notifyDataSetChanged(); // 어댑터에게 데이터 변경
     }
 
+
+    /// 일단 수정도 삭제도 없었네
+
 }

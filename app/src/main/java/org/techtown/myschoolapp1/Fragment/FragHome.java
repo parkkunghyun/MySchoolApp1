@@ -49,6 +49,8 @@ public class FragHome extends Fragment {
     private TextView text;
     ListView list;
 
+    public static final String TABLE_NAME = "seeds_api_TBL";
+
     View dialogView;
 
     @Override
@@ -75,12 +77,16 @@ public class FragHome extends Fragment {
         } else {
             // 최초 실행이 아닐 경우 저장된 데이터를 불러와서 UI 업데이트
             updateUIWithData(getAllDataFromDB());
+            //fetchDataFromAPI();
         }
 
         return view;
     }
 
 
+    // 여기다 찾았다
+    // 매번 새로 지우고 찾아서 그런듯?
+    //
     private void fetchDataFromAPI() {
         new Thread(new Runnable() {
             @Override
@@ -89,9 +95,11 @@ public class FragHome extends Fragment {
                     String apiData = apiUrlConnection();
                     dataList = parseDataFromAPI(apiData);
 
-                    // 기존 데이터를 지우고 새로운 데이터를 저장
+                    // 기존 데이터를 지우고 새로운 데이터를 저장 -? 이게 왜 update에서도 해야함! 이건 처음만 하면 되는데
                     clearOldData();
                     saveData(dataList);
+
+                    Log.d("fetchData", "fetttt");
 
                     activity.runOnUiThread(new Runnable() {
                         @Override
@@ -103,6 +111,23 @@ public class FragHome extends Fragment {
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
+            }
+        }).start();
+    }
+
+    private void updateDataFromAPI() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // 기존 데이터를 지우고 새로운 데이터를 저장 -? 이게 왜 update에서도 해야함! 이건 처음만 하면 되는데
+               // clearOldData();
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateUIWithData(getAllDataFromDB());
+                    }
+                });
+
             }
         }).start();
     }
@@ -119,17 +144,7 @@ public class FragHome extends Fragment {
     }
 
     private String apiUrlConnection() throws IOException, JSONException {
-        /*
-        String urlInfo = "http://api.odcloud.kr/api/15055082/v1/uddi:0a5f4af0-3d39-4510-b26a-e53c24ea3b1e_201909051519";
-        String type = "json";
-        StringBuilder apiUrl = new StringBuilder(urlInfo);
-        apiUrl.append("?page=1&perPage=10");
-        apiUrl.append("&" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + key);
-        apiUrl.append("&" + URLEncoder.encode("dataType", "UTF-8") + "=" + URLEncoder.encode(type, "UTF-8"));
 
-        URL url = new URL(apiUrl.toString());
-
-         */
         String apiUrl = "https://api.odcloud.kr/api/15055082/v1/uddi:1c7c80f0-ac7f-4d8b-840d-c552fee2e763?page=1&perPage=219&serviceKey="+key;
         URL url = new URL(apiUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -189,7 +204,7 @@ public class FragHome extends Fragment {
 
     private void updateUIWithData(List<ApiData> dataList) {
 
-        final MyAdapter adapter = new MyAdapter(getActivity(), android.R.layout.simple_list_item_1, dataList);
+        MyAdapter adapter = new MyAdapter(getActivity(), android.R.layout.simple_list_item_1, dataList);
         list = view.findViewById(R.id.listView);
 
         // 리스트뷰에 어댑터 설정
@@ -201,6 +216,7 @@ public class FragHome extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // 클릭한 아이템의 데이터 가져오기
                 ApiData selectedItem = (ApiData) parent.getItemAtPosition(position);
+                Log.d("selected", selectedItem.getName().toString());
 
                 // AlertDialog를 띄우기 위해 Context 얻기
                 Context context = getActivity();
@@ -221,6 +237,8 @@ public class FragHome extends Fragment {
                 TextView tvName = dialogView.findViewById(R.id.name);
                 tvName.setText("품목명 : "+selectedItem.getName());
 
+                /////////////////////////////////////////////////////////
+
                 // 다이얼로그 생성
                 AlertDialog.Builder dlg = new AlertDialog.Builder(context);
                 dlg.setTitle("데이터 수정");
@@ -235,14 +253,30 @@ public class FragHome extends Fragment {
                         String updatedKg = edtKg.getText().toString();
                         String updatedUsd = edtUsd.getText().toString();
 
-                        // 수정된 데이터를 데이터베이스에 반영
-                        updateData(selectedItem, updatedYear, updatedIsExport, updatedCategory, updatedKg, updatedUsd);
+                        // 1. 데이터가 제대로 변경되었는가 - 0
+                        Log.d("UPDATE", updatedYear + ", " + updatedIsExport + ", " + updatedCategory + ", " + updatedKg + ", " + updatedUsd);
 
-                        // 수정된 데이터를 데이터베이스에서 가져와서 UI 업데이트
-                        updateUIWithUpdatedData(selectedItem.getName(), selectedItem.getYear(), selectedItem.getIsExport(), selectedItem.getCategory(), selectedItem.getKg(), selectedItem.getUsd());
+                        // 수정된 데이터를 데이터베이스에 반영 - 0 일단 db에 넣기 완료
+                        // updateData -> dbUpdataData로 이름 변경
+                        dbUpdateData(selectedItem, updatedYear, updatedIsExport, updatedCategory, updatedKg, updatedUsd);
 
-                        // 데이터를 다시 불러와서 UI 업데이트
-                        fetchDataFromAPI();
+                        Log.d("fffff", updatedYear + ", " + updatedIsExport + ", " + updatedCategory + ", " + updatedKg + ", " + updatedUsd);
+
+                        // 수정된 데이터를 데이터베이스에서 가져와서 UI 업데이트 - 일단 DB에 제대로 들어갔고 어댑터에 전달도 됨!
+                        //updateUIWithUpdatedData(selectedItem.getName(), selectedItem.getYear(), selectedItem.getIsExport(), selectedItem.getCategory(), selectedItem.getKg(), selectedItem.getUsd());
+
+                        Log.d("gggggg", updatedYear + ", " + updatedIsExport + ", " + updatedCategory + ", " + updatedKg + ", " + updatedUsd);
+
+                        // 데이터를 다시 불러와서 UI 업데이트 - 여기다 찾았다
+                        //fetchDataFromAPI();
+
+                        // 그러면 일단 걍 무식하게 여기서 다시 화면 보여주기!
+                        updateDataFromAPI();
+
+
+                        Log.d("hhhh", updatedYear + ", " + updatedIsExport + ", " + updatedCategory + ", " + updatedKg + ", " + updatedUsd);
+
+                        Toast.makeText(getContext(), "success", Toast.LENGTH_LONG).show();
                     }
                 });
                 dlg.setNegativeButton("취소", new DialogInterface.OnClickListener() {
@@ -291,7 +325,6 @@ public class FragHome extends Fragment {
                 return true;
             }
         });
-
     }
 
     private List<ApiData> getAllDataFromDB() {
@@ -299,7 +332,8 @@ public class FragHome extends Fragment {
         return dbHelper.getAllData();
     }
 
-    private void updateData(ApiData selectedItem, String modifiedYear, String modifiedIsExport, String modifiedCategory, String modifiedKg, String modifiedUsd) {
+    // 과연 DB에서는 수정이 되었는가? - 0 일단 수정이 되긴하네 튕기는 부분 없애자
+    private void dbUpdateData(ApiData selectedItem, String modifiedYear, String modifiedIsExport, String modifiedCategory, String modifiedKg, String modifiedUsd) {
         MyDBHelper dbHelper = new MyDBHelper(activity);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
@@ -319,9 +353,23 @@ public class FragHome extends Fragment {
         // DB 업데이트
         db.update(MyDBHelper.TABLE_NAME, values, whereClause, whereArgs);
 
+        try {
+            db.execSQL("UPDATE " + TABLE_NAME + " SET " + "year" + " = '" + modifiedYear + "', is_export" + " = '" + modifiedIsExport + "', category " + " = '" + modifiedCategory + "', kg" + " = '" + modifiedKg + "', usd" + " = '" + modifiedUsd +
+                    "' WHERE " + MyDBHelper.COLUMN_NAME + " = '" + selectedItem.getName() + "' and " +
+                    " " + MyDBHelper.COLUMN_YEAR + " = '" + selectedItem.getYear() + "' and " +
+                    " " + MyDBHelper.COLUMN_IS_EXPORT + " = '" + selectedItem.getIsExport() + "' and " +
+                    " " + MyDBHelper.COLUMN_CATEGORY + " = '" + selectedItem.getCategory() + "' and " +
+                    " " + MyDBHelper.COLUMN_CODE + " = '" + selectedItem.getCode() + "'");
+
+            Log.d("db update", "success");
+        } catch (Exception e) {
+
+        }
+
         dbHelper.close();
 
-        updateUIWithUpdatedData(selectedItem.getName(), selectedItem.getYear(), selectedItem.getIsExport(), selectedItem.getCategory(), selectedItem.getKg(), selectedItem.getUsd());
+        // 중복으로 불렸음- 0
+        updateUIWithUpdatedData(selectedItem, modifiedYear, modifiedIsExport, modifiedCategory, modifiedKg,modifiedUsd);
     }
 
     private void deleteData(ApiData data) {
@@ -340,37 +388,47 @@ public class FragHome extends Fragment {
         dbHelper.close();
     }
 
-    private void updateUIWithUpdatedData(String updatedItemName, String updatedYear, String updatedIsExport, String updatedCategory, String updatedKg, String updatedUsd) {
+
+
+    private void updateUIWithUpdatedData(ApiData selectedItem, String modifiedYear, String modifiedIsExport, String modifiedCategory, String modifiedKg, String modifiedUsd) {
         MyDBHelper dbHelper = new MyDBHelper(activity);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         // 데이터베이스에서 수정된 데이터 가져오기
-        List<ApiData> updatedDataList = dbHelper.getDataByName(updatedItemName);
+        List<ApiData> updatedDataList = dbHelper.getDataByName(selectedItem.getName());
 
         dbHelper.close();
 
         // 수정된 데이터를 찾아서 직접 반영
+
         for (ApiData updatedData : updatedDataList) {
-            if (updatedData.getName().equals(updatedItemName)
-                    && updatedData.getYear().equals(updatedYear)
-                    && updatedData.getIsExport().equals(updatedIsExport)) {
+            if (updatedData.getYear().equals(modifiedYear)
+                    && updatedData.getIsExport().equals(modifiedIsExport)
+                    && updatedData.getKg().equals(modifiedKg)) {
 
                 // 수정된 데이터로 갱신
-                updatedData.setYear(updatedYear);
-                updatedData.setIsExport(updatedIsExport);
-                updatedData.setCategory(updatedCategory);
-                updatedData.setKg(updatedKg);
-                updatedData.setUsd(updatedUsd);
+                updatedData.setYear(modifiedYear);
+                updatedData.setIsExport(modifiedIsExport);
+                updatedData.setCategory(modifiedCategory);
+                updatedData.setKg(modifiedKg);
+                updatedData.setUsd(modifiedUsd);
 
+                Log.d("listview22", updatedData.getName()+ ", " + updatedData.getYear() + ", " + updatedData.getIsExport());
                 break;
             }
         }
 
-        // 어댑터에 수정된 데이터 설정
-        MyAdapter adapter = (MyAdapter) list.getAdapter();
-        adapter.setItems(updatedDataList);
 
-        // 리스트뷰 갱신
-        adapter.notifyDataSetChanged();
+        try {
+            // 어댑터에 수정된 데이터 설정
+            MyAdapter adapter = (MyAdapter) list.getAdapter();
+            adapter.setItems(updatedDataList);
+
+            // 리스트뷰 갱신
+            adapter.notifyDataSetChanged();
+            Log.d("list view success", "succcccccc");
+        } catch (Exception e) {
+
+        }
     }
 }
