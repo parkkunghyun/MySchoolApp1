@@ -164,7 +164,7 @@ public class FragHome extends Fragment {
         return sb.toString();
     }
 
-    //
+    // json 데이터를  ApiData에 맞게 변경 후 리스트에 추가 합니다
     private List<ApiData> parseDataFromAPI(String apiData) throws JSONException {
         List<ApiData> dataList = new ArrayList<>();
 
@@ -183,10 +183,10 @@ public class FragHome extends Fragment {
                     item.getString("금액(USD)")
             ));
         }
-
         return dataList;
     }
 
+    // DB에 리스트에 저장한 내용을 추가하는 함수입니다.
     private void saveData(List<ApiData> dataList) {
         MyDBHelper dbHelper = new MyDBHelper(activity);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -194,10 +194,11 @@ public class FragHome extends Fragment {
         for (ApiData data : dataList) {
             dbHelper.insertData(db, data);
         }
-
         dbHelper.close();
     }
 
+    // 데이터를 보여주고 데이터를 누르면 수정 다이어로그가 나오고, 데이터를 길게 누르면 삭제 다이어로그가 나오는 함수입니다.
+    //
     private void updateUIWithData(List<ApiData> dataList) {
 
         MyAdapter adapter = new MyAdapter(getActivity(), android.R.layout.simple_list_item_1, dataList);
