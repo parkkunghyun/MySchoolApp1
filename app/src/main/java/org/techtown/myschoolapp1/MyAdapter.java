@@ -76,8 +76,4 @@ public class MyAdapter extends BaseAdapter {
         items.addAll(newItems); // 새로운 데이터를 추가
         notifyDataSetChanged(); // 어댑터에게 데이터 변경
     }
-
-
-    /// 일단 수정도 삭제도 없었네
-
 }
