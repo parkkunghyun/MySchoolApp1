@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="spinner_year_array">
+        <item>전체 기간</item>
+        <item>2020</item>
+        <item>2021</item>
+        <item>2022</item>
+    </string-array>
+
+    <string-array name="spinner_isExport_array">
+        <item>전체</item>
+        <item>수입</item>
+        <item>수출</item>
+    </string-array>
+
+    <string-array name="spinner_category_array">
+        <item>전체</item>
+        <item>식량작물</item>
+        <item>사료작물</item>
+        <item>화훼류</item>
+        <item>채소류</item>
+        <item>과수류</item>
+        <item>기타</item>
+    </string-array>
+
+</resources>

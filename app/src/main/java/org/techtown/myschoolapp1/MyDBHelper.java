@@ -119,7 +119,66 @@ public class MyDBHelper extends SQLiteOpenHelper {
     }
 
 
+    // 필터로 데이터를 조회하여 리스트로 반환함
+    // 연도, 수출 여부, 작물 분류, 품목에 따라 데이트를 필터링하여 조회함
+    public List<ApiData> getDataByFilter(String year, String isExport, String category, String name) {
+        List<ApiData> dataList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {COLUMN_YEAR, COLUMN_CODE, COLUMN_CATEGORY, COLUMN_NAME, COLUMN_IS_EXPORT, COLUMN_KG, COLUMN_USD};
+        StringBuilder selectionBuilder = new StringBuilder();
+        List<String> selectionArgsList = new ArrayList<>();
 
-    // DB에서 삭제
+        // 필터 조건 추가
+        if (!year.equals("전체 기간")) {
+            selectionBuilder.append(COLUMN_YEAR).append("=? ");
+            selectionArgsList.add(year);
+        }
+        if (!isExport.equals("전체")) {
+            if (selectionBuilder.length() > 0) {
+                selectionBuilder.append("AND ");
+            }
+            selectionBuilder.append(COLUMN_IS_EXPORT).append("=? ");
+            selectionArgsList.add(isExport);
+        }
+        if (!category.equals("전체")) {
+            if (selectionBuilder.length() > 0) {
+                selectionBuilder.append("AND ");
+            }
+            selectionBuilder.append(COLUMN_CATEGORY).append("=? ");
+            selectionArgsList.add(category);
+        }
+        if (!name.equals("전체")) {
+            if (selectionBuilder.length() > 0) {
+                selectionBuilder.append("AND ");
+            }
+            selectionBuilder.append(COLUMN_NAME).append("=? ");
+            selectionArgsList.add(name);
+        }
 
+        String[] selectionArgs = new String[selectionArgsList.size()];
+        selectionArgsList.toArray(selectionArgs);
+
+        Cursor cursor = db.query(TABLE_NAME, columns, selectionBuilder.toString(), selectionArgs, null, null, null);
+
+        // 커서를 사용하여 필터 값에 해당하는 데이터를 가져옴
+        if (cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range")
+                ApiData data = new ApiData(
+                        cursor.getString(cursor.getColumnIndex(COLUMN_YEAR)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_CODE)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_CATEGORY)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_NAME)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_IS_EXPORT)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_KG)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_USD))
+                );
+                dataList.add(data);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return dataList;
+    }
 }
