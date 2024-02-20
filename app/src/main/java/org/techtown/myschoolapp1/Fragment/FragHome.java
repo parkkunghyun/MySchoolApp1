@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -66,19 +67,25 @@ public class FragHome extends Fragment {
 
         view = inflater.inflate(R.layout.frag_home, container, false);
 
-        // 앱 최초 실행 여부를 SharedPreferences를 이용해 체크
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        boolean isFirstRun = prefs.getBoolean("isFirstRun", true);
+        Button apiBtn = view.findViewById(R.id.apiButton);
+        apiBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // 앱 최초 실행 여부를 SharedPreferences를 이용해 체크
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                boolean isFirstRun = prefs.getBoolean("isFirstRun", true);
 
-        if (isFirstRun) {
-            // 최초 실행일 경우에만 API 데이터를 가져와서 DB에 저장
-            fetchDataFromAPI();
-            prefs.edit().putBoolean("isFirstRun", false).apply();  // 최초 실행 여부 갱신
-        } else {
-            // 최초 실행이 아닐 경우 저장된 데이터를 불러와서 UI 업데이트
-            updateUIWithData(getAllDataFromDB());
-            //fetchDataFromAPI();
-        }
+                if (isFirstRun) {
+                    // 최초 실행일 경우에만 API 데이터를 가져와서 DB에 저장
+                    fetchDataFromAPI();
+                    prefs.edit().putBoolean("isFirstRun", false).apply();  // 최초 실행 여부 갱신
+                } else {
+                    // 최초 실행이 아닐 경우 저장된 데이터를 불러와서 UI 업데이트
+                    updateUIWithData(getAllDataFromDB());
+                    //fetchDataFromAPI();
+                }
+            }
+        });
 
         return view;
     }
@@ -317,11 +324,27 @@ public class FragHome extends Fragment {
         MyDBHelper dbHelper = new MyDBHelper(activity);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
+        String modifiedCode = "";
+        if (modifiedCategory.equals("식량작물")){
+            modifiedCode = "1";
+        }else if(modifiedCategory.equals("사료작물")) {
+            modifiedCode = "2";
+        } else if(modifiedCategory.equals("과수류")) {
+            modifiedCode = "3";
+        }else if(modifiedCategory.equals("채소류")) {
+            modifiedCode = "4";
+        }else if(modifiedCategory.equals("aa")) {
+            modifiedCode = "5";
+        }else if(modifiedCategory.equals("기타")) {
+            modifiedCode = "9";
+        }
+
         ContentValues values = new ContentValues();
         values.put("year", modifiedYear);
         values.put("is_export", modifiedIsExport);
         values.put("category", modifiedCategory);
         values.put("kg", modifiedKg);
+        values.put("code", modifiedCode);
         values.put("usd", modifiedUsd);
 
         String whereClause = MyDBHelper.COLUMN_NAME + "=? AND " +
@@ -336,7 +359,7 @@ public class FragHome extends Fragment {
         dbHelper.close();
 
         // db에 수정을 설정하고 어댑터에 수정된 부분을 넘겨서 수정된 부분이 화면에 나오게 설정했습니다.
-        updateUIWithUpdatedData(selectedItem, modifiedYear, modifiedIsExport, modifiedCategory, modifiedKg,modifiedUsd);
+        updateUIWithUpdatedData(selectedItem, modifiedYear, modifiedIsExport, modifiedCategory, modifiedKg,modifiedUsd, modifiedCode);
     }
 
     private void deleteData(ApiData data) {
@@ -355,7 +378,7 @@ public class FragHome extends Fragment {
         dbHelper.close();
     }
 
-    private void updateUIWithUpdatedData(ApiData selectedItem, String modifiedYear, String modifiedIsExport, String modifiedCategory, String modifiedKg, String modifiedUsd) {
+    private void updateUIWithUpdatedData(ApiData selectedItem, String modifiedYear, String modifiedIsExport, String modifiedCategory, String modifiedKg, String modifiedUsd, String modifiedCode) {
         MyDBHelper dbHelper = new MyDBHelper(activity);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
@@ -377,6 +400,7 @@ public class FragHome extends Fragment {
                 updatedData.setCategory(modifiedCategory);
                 updatedData.setKg(modifiedKg);
                 updatedData.setUsd(modifiedUsd);
+                updatedData.setCode(modifiedCode);
 
                 Log.d("listview22", updatedData.getName()+ ", " + updatedData.getYear() + ", " + updatedData.getIsExport());
                 break;
