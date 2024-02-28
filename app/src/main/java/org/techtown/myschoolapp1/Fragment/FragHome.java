@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,9 +70,12 @@ public class FragHome extends Fragment {
         view = inflater.inflate(R.layout.frag_home, container, false);
 
         Button apiBtn = view.findViewById(R.id.apiButton);
+        LinearLayout l1 = view.findViewById(R.id.linearLayout1);
+
         apiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                l1.setVisibility(View.VISIBLE);
                 // 앱 최초 실행 여부를 SharedPreferences를 이용해 체크
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
                 boolean isFirstRun = prefs.getBoolean("isFirstRun", true);
@@ -214,104 +219,6 @@ public class FragHome extends Fragment {
         // 리스트뷰에 어댑터 설정
         list.setAdapter(adapter);
 
-        // 리스트뷰 아이템 클릭 이벤트 처리
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // 클릭한 아이템의 데이터 가져오기
-                ApiData selectedItem = (ApiData) parent.getItemAtPosition(position);
-                Log.d("selected", selectedItem.getName().toString());
-
-                // AlertDialog를 띄우기 위해 Context 얻기
-                Context context = getActivity();
-
-                dialogView = (View) View.inflate(context, R.layout.dialog_modify, null);
-
-                EditText edtYear = dialogView.findViewById(R.id.year);
-                edtYear.setText(selectedItem.getYear());
-                EditText edtIsExport = dialogView.findViewById(R.id.isExport);
-                edtIsExport.setText(selectedItem.getIsExport());
-                EditText edtCategory = dialogView.findViewById(R.id.category);
-                edtCategory.setText(selectedItem.getCategory());
-                EditText edtKg = dialogView.findViewById(R.id.kg);
-                edtKg.setText(selectedItem.getKg());
-                EditText edtUsd = dialogView.findViewById(R.id.usd);
-                edtUsd.setText(selectedItem.getUsd());
-
-                TextView tvName = dialogView.findViewById(R.id.name);
-                tvName.setText("품목명 : "+selectedItem.getName());
-
-                /////////////////////////////////////////////////////////
-
-                // 다이얼로그 생성
-                AlertDialog.Builder dlg = new AlertDialog.Builder(context);
-                dlg.setTitle("데이터 수정");
-                dlg.setView(dialogView);
-                dlg.setPositiveButton("적용", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 수정된 데이터를 가져오기
-                        String updatedYear = edtYear.getText().toString();
-                        String updatedIsExport = edtIsExport.getText().toString();
-                        String updatedCategory = edtCategory.getText().toString();
-                        String updatedKg = edtKg.getText().toString();
-                        String updatedUsd = edtUsd.getText().toString();
-
-                        // updateData함수를 -> dbUpdataData로 이름 변경
-                        dbUpdateData(selectedItem, updatedYear, updatedIsExport, updatedCategory, updatedKg, updatedUsd);
-
-                        // fetchDataFromAPI -> updateDataFromAPI함수를 불러옴으로 수정이 적용된 DB를 불러와 보여지게 했습니다.
-                        updateDataFromAPI();
-
-                        Toast.makeText(getContext(), "success", Toast.LENGTH_LONG).show();
-                    }
-                });
-                dlg.setNegativeButton("취소", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getActivity(), "취소했습니다", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                dlg.show();
-            }
-        });
-
-        list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                // 길게 클릭한 아이템의 데이터 가져오기
-                final ApiData selectedData = (ApiData) parent.getItemAtPosition(position);
-
-                // AlertDialog를 띄우기 위해 Context 얻기
-                Context context = getActivity();
-
-                AlertDialog.Builder dlg = new AlertDialog.Builder(context);
-                dlg.setTitle("삭제 확인");
-                dlg.setMessage("삭제하시겠습니까?");
-
-                dlg.setPositiveButton("삭제", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 데이터베이스에서 삭제
-                        deleteData(selectedData);
-
-                        // 리스트뷰에서 삭제
-                        dataList.remove(selectedData);
-                        adapter.notifyDataSetChanged();
-                    }
-                });
-
-                dlg.setNegativeButton("취소", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-
-                dlg.show();
-
-                return true;
-            }
-        });
     }
 
     private List<ApiData> getAllDataFromDB() {
@@ -319,105 +226,4 @@ public class FragHome extends Fragment {
         return dbHelper.getAllData();
     }
 
-    // db
-    private void dbUpdateData(ApiData selectedItem, String modifiedYear, String modifiedIsExport, String modifiedCategory, String modifiedKg, String modifiedUsd) {
-        MyDBHelper dbHelper = new MyDBHelper(activity);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        String modifiedCode = "";
-        if (modifiedCategory.equals("식량작물")){
-            modifiedCode = "1";
-        }else if(modifiedCategory.equals("사료작물")) {
-            modifiedCode = "2";
-        } else if(modifiedCategory.equals("과수류")) {
-            modifiedCode = "3";
-        }else if(modifiedCategory.equals("채소류")) {
-            modifiedCode = "4";
-        }else if(modifiedCategory.equals("aa")) {
-            modifiedCode = "5";
-        }else if(modifiedCategory.equals("기타")) {
-            modifiedCode = "9";
-        }
-
-        ContentValues values = new ContentValues();
-        values.put("year", modifiedYear);
-        values.put("is_export", modifiedIsExport);
-        values.put("category", modifiedCategory);
-        values.put("kg", modifiedKg);
-        values.put("code", modifiedCode);
-        values.put("usd", modifiedUsd);
-
-        String whereClause = MyDBHelper.COLUMN_NAME + "=? AND " +
-                MyDBHelper.COLUMN_YEAR + "=? AND " +
-                MyDBHelper.COLUMN_IS_EXPORT + "=?";
-
-        String[] whereArgs = {selectedItem.getName(), selectedItem.getYear(), selectedItem.getIsExport()};
-
-        // DB 업데이트
-        db.update(MyDBHelper.TABLE_NAME, values, whereClause, whereArgs);
-
-        dbHelper.close();
-
-        // db에 수정을 설정하고 어댑터에 수정된 부분을 넘겨서 수정된 부분이 화면에 나오게 설정했습니다.
-        updateUIWithUpdatedData(selectedItem, modifiedYear, modifiedIsExport, modifiedCategory, modifiedKg,modifiedUsd, modifiedCode);
-    }
-
-    private void deleteData(ApiData data) {
-        MyDBHelper dbHelper = new MyDBHelper(getActivity());
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        String whereClause = MyDBHelper.COLUMN_NAME + "=? AND " +
-                MyDBHelper.COLUMN_YEAR + "=? AND " +
-                MyDBHelper.COLUMN_IS_EXPORT + "=?";
-
-        String[] whereArgs = {data.getName(), data.getYear(), data.getIsExport()}; // 품목명, 년도, 수출입을 기준으로 삭제
-
-        // 데이터베이스에서 삭제
-        db.delete(MyDBHelper.TABLE_NAME, whereClause, whereArgs);
-
-        dbHelper.close();
-    }
-
-    private void updateUIWithUpdatedData(ApiData selectedItem, String modifiedYear, String modifiedIsExport, String modifiedCategory, String modifiedKg, String modifiedUsd, String modifiedCode) {
-        MyDBHelper dbHelper = new MyDBHelper(activity);
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        // 데이터베이스에서 수정된 데이터 가져오기
-        List<ApiData> updatedDataList = dbHelper.getDataByName(selectedItem.getName());
-
-        dbHelper.close();
-
-        // 수정된 데이터를 찾아서 직접 반영
-
-        for (ApiData updatedData : updatedDataList) {
-            if (updatedData.getYear().equals(modifiedYear)
-                    && updatedData.getIsExport().equals(modifiedIsExport)
-                    && updatedData.getKg().equals(modifiedKg)) {
-
-                // 수정된 데이터로 갱신
-                updatedData.setYear(modifiedYear);
-                updatedData.setIsExport(modifiedIsExport);
-                updatedData.setCategory(modifiedCategory);
-                updatedData.setKg(modifiedKg);
-                updatedData.setUsd(modifiedUsd);
-                updatedData.setCode(modifiedCode);
-
-                Log.d("listview22", updatedData.getName()+ ", " + updatedData.getYear() + ", " + updatedData.getIsExport());
-                break;
-            }
-        }
-
-
-        try {
-            // 어댑터에 수정된 데이터 설정
-            MyAdapter adapter = (MyAdapter) list.getAdapter();
-            adapter.setItems(updatedDataList);
-
-            // 리스트뷰 갱신
-            adapter.notifyDataSetChanged();
-            Log.d("list view success", "succcccccc");
-        } catch (Exception e) {
-
-        }
-    }
 }

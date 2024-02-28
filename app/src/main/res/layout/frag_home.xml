@@ -19,6 +19,7 @@
         android:id="@+id/apiButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:text="농축산물 3개년 데이터 불러오기"></Button>
 
     <View
@@ -36,6 +37,7 @@
         android:layout_marginTop="20dp"
         android:background="#d7d7d7"
         android:orientation="vertical"
+        android:visibility="invisible"
         tools:ignore="MissingConstraints">
 
         <TextView
@@ -44,13 +46,15 @@
             android:layout_height="wrap_content"
             android:text="품목"
             android:textColor="#000000"
-            android:textSize="18dp"></TextView>
+            android:textSize="18dp"
+            android:visibility="invisible"></TextView>
 
         <LinearLayout
             android:id="@+id/linearLayout2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="invisible">
 
             <TextView
                 android:id="@+id/year"
@@ -99,6 +103,7 @@
         android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="610dp"
-        android:layout_marginTop="5dp"></ListView>
+        android:layout_marginTop="5dp"
+        android:visibility="invisible"></ListView>
 
 </LinearLayout>
