@@ -17,10 +17,16 @@
 
     <Button
         android:id="@+id/apiButton"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="농축산물 3개년 데이터 불러오기"></Button>
+
+    <Button
+        android:id="@+id/csvButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="csv파일에서 농축산물 데이터 가져오기" />
 
     <View
         android:id="@+id/line"

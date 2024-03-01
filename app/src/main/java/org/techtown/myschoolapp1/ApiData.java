@@ -9,6 +9,9 @@ public class ApiData {
     private String kg;
     private String usd;
 
+    public ApiData() {
+
+    }
 
     public ApiData(String year, String code, String category, String name, String isExport, String kg, String usd) {
         this.year = year;

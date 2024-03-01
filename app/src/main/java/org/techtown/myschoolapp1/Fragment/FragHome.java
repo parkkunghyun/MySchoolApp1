@@ -1,44 +1,45 @@
 package org.techtown.myschoolapp1.Fragment;
 
-import android.app.AlertDialog;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.techtown.myschoolapp1.ApiData;
+import org.techtown.myschoolapp1.CsvParser;
 import org.techtown.myschoolapp1.MyAdapter;
 import org.techtown.myschoolapp1.MyDBHelper;
 import org.techtown.myschoolapp1.R;
 import org.techtown.myschoolapp1.SecondActivity;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,6 +73,30 @@ public class FragHome extends Fragment {
         Button apiBtn = view.findViewById(R.id.apiButton);
         LinearLayout l1 = view.findViewById(R.id.linearLayout1);
 
+        Button csvBtn = view.findViewById(R.id.csvButton);
+
+        dataList = new ArrayList<>();
+
+        csvBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Thread thread = new Thread();
+                try {
+                    if(!dataList.isEmpty()) {
+                        dataList.clear();
+                        clearOldData();
+                    }
+                    dataList = getDataList();
+                    Log.d("datalist", dataList.get(0).getName().toString());
+                    saveData(dataList);
+                    updateUIWithData(getAllDataFromDB());
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         apiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -93,6 +118,35 @@ public class FragHome extends Fragment {
         });
 
         return view;
+    }
+
+    public List<ApiData> getDataList() throws IOException {
+
+        InputStream is = getContext().getResources().openRawResource(R.raw.csvdata);    // res/raw/item.csv 파일을 불러오기 위해 해당 코드 작성
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+
+        String line = "";
+
+        List<ApiData> itemList = new ArrayList<>();
+
+        while ((line = reader.readLine()) != null) {
+            String[] tokens = line.split(",");    // 각 행을 순차적으로 돌면서 , 를 기준으로 분리하여 배열에 저장한다.
+
+            ApiData apiData = new ApiData();
+            apiData.setYear(tokens[0]);
+            apiData.setCode(tokens[1]);
+            apiData.setCategory(tokens[2]);
+            apiData.setName(tokens[3]);
+            apiData.setIsExport(tokens[4]);
+            apiData.setKg(tokens[5]);
+            apiData.setUsd(tokens[6]);
+            itemList.add(apiData); // 반환할 리스트에 파싱된 행 데이터 저장
+        }
+
+        reader.close();
+        is.close();
+
+        return itemList;
     }
 
     // 이 함수는 처음 앱을 실행했을때 공공api데이터를 불러오는 함수입니다.
@@ -204,8 +258,24 @@ public class FragHome extends Fragment {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         for (ApiData data : dataList) {
+            if (data.getName().equals("품목")) continue;
             dbHelper.insertData(db, data);
         }
+
+        Log.d("saveData", "ddddd");
+        dbHelper.close();
+    }
+
+    private void saveData2(List<ApiData> dataList) {
+        MyDBHelper dbHelper = new MyDBHelper(activity);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        for (ApiData data : dataList) {
+
+            dbHelper.insertData(db, data);
+        }
+
+        Log.d("saveData", "ddddd");
         dbHelper.close();
     }
 
@@ -218,7 +288,6 @@ public class FragHome extends Fragment {
 
         // 리스트뷰에 어댑터 설정
         list.setAdapter(adapter);
-
     }
 
     private List<ApiData> getAllDataFromDB() {
