@@ -80,20 +80,7 @@ public class FragHome extends Fragment {
         csvBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Thread thread = new Thread();
-                try {
-                    if(!dataList.isEmpty()) {
-                        dataList.clear();
-                        clearOldData();
-                    }
-                    dataList = getDataList();
-                    Log.d("datalist", dataList.get(0).getName().toString());
-                    saveData(dataList);
-                    updateUIWithData(getAllDataFromDB());
-
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                updateDataFromAPI();
             }
         });
 
@@ -181,13 +168,21 @@ public class FragHome extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateUIWithData(getAllDataFromDB());
-                    }
-                });
+                try {
+                    dataList = dataList = getDataList();
 
+                    // 만약에 sqlite에 중복 table이 있다면 삭제 후 현재 불러온 데이터를 저장합니다.
+                    clearOldData();
+                    saveData(dataList);
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateUIWithData(dataList);
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
     }
@@ -259,19 +254,6 @@ public class FragHome extends Fragment {
 
         for (ApiData data : dataList) {
             if (data.getName().equals("품목")) continue;
-            dbHelper.insertData(db, data);
-        }
-
-        Log.d("saveData", "ddddd");
-        dbHelper.close();
-    }
-
-    private void saveData2(List<ApiData> dataList) {
-        MyDBHelper dbHelper = new MyDBHelper(activity);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        for (ApiData data : dataList) {
-
             dbHelper.insertData(db, data);
         }
 
