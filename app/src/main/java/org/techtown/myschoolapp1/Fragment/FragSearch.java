@@ -21,6 +21,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.Firebase;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import org.techtown.myschoolapp1.ApiData;
 import org.techtown.myschoolapp1.MyAdapter;
 import org.techtown.myschoolapp1.MyDBHelper;
@@ -32,10 +38,9 @@ import java.util.List;
 
 public class FragSearch extends Fragment {
     private View view;
-    private String TAG = "star 프래그먼트";
+    private String TAG = "search 프래그먼트";
     Spinner year_spinner, isExport_spinner, category_spinner;
     EditText name_edit;
-
 
     TextView textView;
     View dialogView;
@@ -48,6 +53,13 @@ public class FragSearch extends Fragment {
     String selectedCategory;
     String selectedName;
 
+
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+
+    DatabaseReference databaseReference;
+
+
     // 프래그먼트의 UI를 생성하고 반환
     // 검색 필터를 설정하는 버튼에 대한 클릭 리스너를 등록하고, 검색 결과를 표시할 리스트뷰를 설정
     @Nullable
@@ -57,6 +69,10 @@ public class FragSearch extends Fragment {
         view = inflater.inflate(R.layout.frag_search, container, false);
 
         textView = view.findViewById(R.id.tv2);
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+
+
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,14 +114,25 @@ public class FragSearch extends Fragment {
                         // 데이터베이스에서 선택된 조건에 맞는 데이터 가져오기
                         List<ApiData> searchData = fetchDataFromDB(selectedYear, selectedIsExport, selectedCategory, selectedName);
 
+
+                        if(user.getEmail().toString().equals("12@naver.com")) {
+                            updateListView(searchData);
+                            Toast.makeText(getContext(), "success 권한.", Toast.LENGTH_LONG).show();
+                        }else {
+                            noAuthUserListView(searchData);
+                            Toast.makeText(getContext(), "권한없습니다.", Toast.LENGTH_LONG).show();
+                        }
                         // 가져온 데이터로 리스트뷰 업데이트
-                        updateListView(searchData);
+                        
+
+                        Toast.makeText(getContext(), "검색 완료했습니다.", Toast.LENGTH_LONG).show();
                     }
                 })
                 .setNegativeButton("취소", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
+                        Toast.makeText(getContext(), "취소했습니다.", Toast.LENGTH_LONG).show();
                     }
                 });
         AlertDialog dialog = builder.create();
@@ -118,17 +145,36 @@ public class FragSearch extends Fragment {
         return dbHelper.getDataByFilter(year, isExport, category, name);
     }
 
-     private void updateListView2(List<ApiData> data) {
-        adapter.setItems(data);
+    // 수정된 데이터를 데이터베이스에서 가져와서 UI를 업데이트하는 메서드
+    private void updateDataFromAPI() {
+        // 데이터베이스에서 수정된 데이터를 가져오고 UI를 업데이트하는 로직 추가
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final List<ApiData> updatedData = fetchDataFromDB(selectedYear, selectedIsExport, selectedCategory, selectedName);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // 수정된 데이터를 어댑터에 설정
+                        adapter.setItems(updatedData);
+                        // 어댑터에 데이터 설정 후 즉시 반영되도록 notifyDataSetChanged() 호출
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }).start();
     }
 
+    private void noAuthUserListView(List<ApiData> data) {
+        adapter.setItems(data);
+        // 어댑터에 데이터가 변경되었음을 알림
+    }
 
-
-    // 리스트뷰를 업데이트하여 검색 결과를 표시하는 메서드
+        // 리스트뷰를 업데이트하여 검색 결과를 표시하는 메서드
     // 가져온 데이터를 어댑터에 설정하여 리스트뷰를 업데이트
     private void updateListView(List<ApiData> data) {
         adapter.setItems(data);
-
+        adapter.notifyDataSetChanged(); // 어댑터에 데이터가 변경되었음을 알림
 
         List<ApiData> searchData = fetchDataFromDB(selectedYear, selectedIsExport, selectedCategory, selectedName);
 
@@ -174,14 +220,11 @@ public class FragSearch extends Fragment {
                         String updatedKg = edtKg.getText().toString();
                         String updatedUsd = edtUsd.getText().toString();
 
-                        // updateData함수를 -> dbUpdataData로 이름 변경
                         dbUpdateData(selectedItem, updatedYear, updatedIsExport, updatedCategory, updatedKg, updatedUsd);
 
-                        // fetchDataFromAPI -> updateDataFromAPI함수를 불러옴으로 수정이 적용된 DB를 불러와 보여지게 했습니다.
-                        //updateDataFromAPI();
-                        findView(searchData);
+                        updateDataFromAPI();
 
-                        Toast.makeText(getContext(), "success", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "수정 완료했습니다.", Toast.LENGTH_LONG).show();
                     }
                 });
                 dlg.setNegativeButton("취소", new DialogInterface.OnClickListener() {
@@ -191,6 +234,7 @@ public class FragSearch extends Fragment {
                     }
                 });
                 dlg.show();
+
             }
         });
 
@@ -213,19 +257,18 @@ public class FragSearch extends Fragment {
                         // 데이터베이스에서 삭제
                         deleteData(selectedData);
 
-                        //
-                        // 리스트뷰에서 삭제 및 갱신인데 갱신은 안됨 이거 고쳐야함
                         searchData.remove(selectedData);
-                        //adapter.notifyDataSetChanged();
 
-                        findView(searchData);
-                        // 여기서 다시 보여주는것만 있으면 됨!
+                        updateDataFromAPI();
+
+                        Toast.makeText(getContext(), "삭제 완료했습니다.", Toast.LENGTH_LONG).show();
                     }
                 });
 
                 dlg.setNegativeButton("취소", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getContext(), "취소했습니다.", Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -235,17 +278,10 @@ public class FragSearch extends Fragment {
         });
     }
 
-    private void findView(List<ApiData> data) {
-        adapter = new MyAdapter(getActivity(), R.layout.custom_listview, new ArrayList<ApiData>());
-        listView.setAdapter(adapter);
-        adapter.setItems(data);
-    }
-
-
     private void dbUpdateData(ApiData selectedItem, String modifiedYear, String modifiedIsExport, String modifiedCategory, String modifiedKg, String modifiedUsd) {
         MyDBHelper dbHelper = new MyDBHelper(getActivity());
 
-        Log.d("dbUpdateData", "dddd");
+        Log.d("dbUpdateData", "dbUpdateData");
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
@@ -283,7 +319,7 @@ public class FragSearch extends Fragment {
 
         dbHelper.close();
 
-        // db에 수정을 설정하고 어댑터에 수정된 부분을 넘겨서 수정된 부분이 화면에 나오게 설정했습니다.
+        // db에 수정을 설정하고 어댑터에 수정된 부분을 넘겨서 수정된 부분이 화면에 나오게 설정
         updateUIWithUpdatedData(selectedItem, modifiedYear, modifiedIsExport, modifiedCategory, modifiedKg,modifiedUsd, modifiedCode);
     }
 
@@ -327,7 +363,6 @@ public class FragSearch extends Fragment {
                 updatedData.setUsd(modifiedUsd);
                 updatedData.setCode(modifiedCode);
 
-                Log.d("listview22", updatedData.getName()+ ", " + updatedData.getYear() + ", " + updatedData.getIsExport());
                 break;
             }
         }
@@ -340,7 +375,7 @@ public class FragSearch extends Fragment {
 
             // 리스트뷰 갱신
             adapter.notifyDataSetChanged();
-            Log.d("list view success", "succcccccc");
+            Log.d("list view success", "list view success");
         } catch (Exception e) {
 
         }

@@ -26,24 +26,22 @@
         android:layout_marginTop="30dp"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@+id/signUpTextView">
-
         <TextView
             android:id="@+id/signUp_idTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="아이디*"
-            android:textColor="#000000"
-            android:textSize="12dp"></TextView>
-
+            android:textSize="12dp"
+            android:text="이메일 *"
+            android:textColor="#000000"></TextView>
         <EditText
             android:id="@+id/signUp_idEditText"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="@drawable/edittext_rounded_border"
-            android:hint="이메일을 입력해주세요"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
-            android:textSize="12dp"></EditText>
+            android:textSize="12dp"
+            android:background="@drawable/edittext_rounded_border"
+            android:hint="예) apple@gmail.com"></EditText>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/signUp_linearLayout2"
@@ -59,17 +57,16 @@
             android:textSize="12dp"
             android:text="비밀번호 *"
             android:textColor="#000000"></TextView>
-
         <EditText
             android:id="@+id/signUp_pwEditText"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="@drawable/edittext_rounded_border"
-            android:hint="영문, 숫자 조합 8~16자"
             android:paddingLeft="16dp"
-            android:inputType="textPassword"
             android:paddingRight="16dp"
-            android:textSize="12dp"></EditText>
+            android:textSize="12dp"
+            android:background="@drawable/edittext_rounded_border"
+            android:hint="비밀번호를 입력해주세요."
+            android:inputType="textPassword"></EditText>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/signUp_linearLayout3"
@@ -92,9 +89,9 @@
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:textSize="12dp"
-            android:inputType="textPassword"
             android:background="@drawable/edittext_rounded_border"
-            android:hint="비밀번호를 한 번 더 입력해주세요."></EditText>
+            android:hint="비밀번호를 한 번 더 입력해주세요."
+            android:inputType="textPassword"></EditText>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/signUp_linearLayout4"
@@ -127,24 +124,24 @@
         android:layout_marginTop="10dp"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@+id/signUp_linearLayout4">
-
         <TextView
-            android:id="@+id/signUp_emailTextView"
+            android:id="@+id/signUp_numberTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="이메일 확인*"
-            android:textColor="#000000"
-            android:textSize="12dp"></TextView>
+            android:textSize="12dp"
+            android:text="전화번호 *"
+            android:textColor="#000000"></TextView>
         <EditText
-            android:id="@+id/signUp_emailEditText"
+            android:id="@+id/signUp_numberEditText"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:textSize="12dp"
             android:background="@drawable/edittext_rounded_border"
-            android:hint="예) apple@gmail.com"></EditText>
+            android:hint="예) 01012345678"></EditText>
     </LinearLayout>
+
     <android.widget.Button
         android:id="@+id/signUpBtn"
         android:layout_width="match_parent"

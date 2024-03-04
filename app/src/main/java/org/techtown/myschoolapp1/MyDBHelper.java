@@ -13,8 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MyDBHelper extends SQLiteOpenHelper {
-    public static final String DATABASE_NAME = "seeds_DB";
 
+    // 데이터베이스 및 테이블 관련 상수 정의
+    public static final String DATABASE_NAME = "seeds_DB";
     public static final String TABLE_NAME = "seeds_api_TBL";
     public static final String COLUMN_YEAR = "year";
     public static final String COLUMN_CODE = "code";
@@ -24,6 +25,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
     public static final String COLUMN_KG = "kg";
     public static final String COLUMN_USD = "usd";
 
+    // Context를 받아 데이터베이스를 생성함
     public MyDBHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, 1);
     }
@@ -42,11 +44,9 @@ public class MyDBHelper extends SQLiteOpenHelper {
         db.execSQL(createTableQuery);
     }
 
+    // 데이터베이스 버전 업그레이드 시 호출되는 메서드(미구현)
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        onCreate(db);
-    }
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
 
     // OpenAPI로부터 받은 데이터를 SQLite에 삽입하는 메서드
     public void insertData(SQLiteDatabase db, ApiData data) {
@@ -59,15 +59,24 @@ public class MyDBHelper extends SQLiteOpenHelper {
         values.put(COLUMN_KG, data.getKg());
         values.put(COLUMN_USD, data.getUsd());
 
+        // ContentValues 객체를 사용하여 데이터베이스에 행 삽입
         db.insert(TABLE_NAME, null, values);
     }
 
-    // SQLite에서 데이터를 조회하는 메서드
+    // 데이터베이스에서 모든 데이터 삭제하는 메서드
+    public void deleteAllData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NAME, null, null);
+        db.close();
+    }
+
+    // SQLite에서 테이블에 있는 모든 데이터를 조회하여 리스트로 반환하는 메서드
     public List<ApiData> getAllData() {
         List<ApiData> dataList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
 
+        // 커서를 사용하여 데이터를 가져옴
         if (cursor.moveToFirst()) {
             do {
                 @SuppressLint("Range")
@@ -89,6 +98,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
         return dataList;
     }
 
+    // 품목이름으로 데이터를 조회하여 리스트로 반환함
     public List<ApiData> getDataByName(String name) {
         List<ApiData> dataList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -97,6 +107,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
         String[] selectionArgs = {name};
         Cursor cursor = db.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
 
+        // 커서를 사용하여 데이터를 가져옴
         if (cursor.moveToFirst()) {
             do {
                 @SuppressLint("Range")
@@ -117,7 +128,6 @@ public class MyDBHelper extends SQLiteOpenHelper {
         db.close();
         return dataList;
     }
-
 
     // 필터로 데이터를 조회하여 리스트로 반환함
     // 연도, 수출 여부, 작물 분류, 품목에 따라 데이트를 필터링하여 조회함

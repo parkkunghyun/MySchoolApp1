@@ -1,62 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".ProfileActivity">
 
     <TextView
         android:id="@+id/tv1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="20dp"
         android:text="설정  -  프로필 관리"
+        android:textSize="20dp"
         android:textColor="#000000"
-        android:textSize="20dp" />
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
         android:id="@+id/back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="뒤로가기"
+        android:textSize="15dp"
+        android:textColor="#aeaeae"
         android:layout_marginTop="25dp"
         android:layout_marginEnd="10dp"
-        android:text="뒤로가기"
-        android:textColor="#aeaeae"
-        android:textSize="15dp" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <View
         android:id="@+id/line"
         android:layout_width="390dp"
         android:layout_height="2dp"
         android:layout_marginTop="10dp"
-        android:background="#aeaeae" />
+        android:background="#aeaeae"
+        app:layout_constraintTop_toBottomOf="@+id/tv1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <ImageView
+        android:id="@+id/iv1"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@+id/line"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"></ImageView>
 
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="370dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/iv1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="15dp"
             android:text="이름"
-            android:textColor="#000000"
-            android:textSize="15dp"></TextView>
-
+            android:textColor="#000000"></TextView>
         <EditText
             android:id="@+id/name_edit"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="@drawable/edittext_rounded_border"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
-            android:text="홍길동"
+            android:textSize="15dp"
             android:textColor="#aeaeae"
-            android:textSize="15dp"></EditText>
+            android:background="@drawable/edittext_rounded_border"
+            android:text=""></EditText>
     </LinearLayout>
 
     <LinearLayout
@@ -64,25 +81,26 @@
         android:layout_width="370dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:orientation="vertical">
-
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="15dp"
             android:text="전화번호"
-            android:textColor="#000000"
-            android:textSize="15dp"></TextView>
-
+            android:textColor="#000000"></TextView>
         <EditText
             android:id="@+id/number_edit"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="@drawable/edittext_rounded_border"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
-            android:text="01012345678"
+            android:textSize="15dp"
             android:textColor="#aeaeae"
-            android:textSize="15dp"></EditText>
+            android:background="@drawable/edittext_rounded_border"
+            android:text=""></EditText>
     </LinearLayout>
 
     <android.widget.Button
@@ -90,8 +108,11 @@
         android:layout_width="370dp"
         android:layout_height="60dp"
         android:layout_marginTop="30dp"
-        android:background="@drawable/button_rounded_corners"
         android:text="변경사항 수정"
-        android:textColor="#000000"></android.widget.Button>
+        android:textColor="#000000"
+        android:background="@drawable/button_rounded_corners"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"></android.widget.Button>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
