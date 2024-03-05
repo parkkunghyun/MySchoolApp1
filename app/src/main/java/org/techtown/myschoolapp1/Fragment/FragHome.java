@@ -2,9 +2,11 @@ package org.techtown.myschoolapp1.Fragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,28 +25,31 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.techtown.myschoolapp1.ApiData;
 import org.techtown.myschoolapp1.CSVParser;
+import org.techtown.myschoolapp1.CSVWriter;
 import org.techtown.myschoolapp1.MyAdapter;
 import org.techtown.myschoolapp1.MyDBHelper;
 import org.techtown.myschoolapp1.R;
 import org.techtown.myschoolapp1.SecondActivity;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +60,10 @@ public class FragHome extends Fragment {
 
     private ActivityResultLauncher<String> mGetContent;
 
+    private MyDBHelper dbHelper;
+
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -62,6 +71,8 @@ public class FragHome extends Fragment {
         view = inflater.inflate(R.layout.frag_home, container, false);
 
         Button selectButton = (Button) view.findViewById(R.id.select_button);
+
+        Button csvOutBtn = (Button)view.findViewById(R.id.csvout_btn);
 
         // ActivityResultLauncher를 초기화
         mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
@@ -85,7 +96,62 @@ public class FragHome extends Fragment {
             }
         });
 
+        csvOutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                exportDB();
+            }
+        });
+
         return view;
+    }
+
+
+
+    private void exportDB() {
+
+        File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        String nowTime = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            nowTime = DateTimeFormatter.ofPattern("yyyyMMddhhmmss").format(LocalDateTime.now());
+        }
+
+        // 현재 시각을 파일명으로 해주기
+        String fileName = nowTime + ".csv";
+        File file = new File(root, fileName);
+
+        try
+        {
+            file.createNewFile();
+            CSVWriter csvWrite = new CSVWriter(new FileWriter(file));
+            MyDBHelper dbHelper = new MyDBHelper(requireContext());
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+            // table 이름 써주기 (myCases2 대신 다른 이름)
+            Cursor curCSV = db.rawQuery("SELECT * FROM seeds_api_TBL", null);
+
+            csvWrite.writeNext(curCSV.getColumnNames());
+            Log.d("curCSV", curCSV.getColumnNames().toString());
+
+            curCSV.moveToNext();
+
+            while(curCSV.moveToNext())
+            {
+                //내가 쓰고 싶은 열 순서대로 써주기
+                String arrStr[] ={curCSV.getString(0),curCSV.getString(1), curCSV.getString(2),curCSV.getString(3),curCSV.getString(4), curCSV.getString(5), curCSV.getString(6)};
+                csvWrite.writeNext(arrStr);
+            }
+            csvWrite.close();
+            curCSV.close();
+
+            Toast.makeText(requireContext(), "데이터를 내보냈습니다.", Toast.LENGTH_SHORT).show();
+        }
+        catch(Exception sqlEx)
+        {
+            Log.e("MainActivity", sqlEx.getMessage(), sqlEx);
+        }
+
+
     }
 
     // 선택한 파일의 URI를 처리하는 메서드

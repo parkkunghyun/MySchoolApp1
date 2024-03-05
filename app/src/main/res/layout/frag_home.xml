@@ -39,4 +39,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <android.widget.Button
+        android:id="@+id/csvout_btn"
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="444dp"
+        android:background="@drawable/button_rounded_corners"
+        android:text="CSV파일로 내보내기"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.09"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/line" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -70,6 +70,8 @@ public class MyDBHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+
+
     // SQLite에서 테이블에 있는 모든 데이터를 조회하여 리스트로 반환하는 메서드
     public List<ApiData> getAllData() {
         List<ApiData> dataList = new ArrayList<>();
@@ -97,6 +99,8 @@ public class MyDBHelper extends SQLiteOpenHelper {
         db.close();
         return dataList;
     }
+
+
 
     // 품목이름으로 데이터를 조회하여 리스트로 반환함
     public List<ApiData> getDataByName(String name) {
