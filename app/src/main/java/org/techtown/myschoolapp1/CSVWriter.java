@@ -15,11 +15,11 @@ public class CSVWriter {
 
     private String lineEnd;
 
-    public static final char DEFAULT_ESCAPE_CHARACTER = '"';
+    public static final char DEFAULT_ESCAPE_CHARACTER = ' ';
 
     public static final char DEFAULT_SEPARATOR = ',';
 
-    public static final char DEFAULT_QUOTE_CHARACTER = '"';
+    public static final char DEFAULT_QUOTE_CHARACTER = ' ';
 
     public static final char NO_QUOTE_CHARACTER = '\u0000';
 
