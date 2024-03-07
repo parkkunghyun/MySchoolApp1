@@ -130,7 +130,7 @@ public class FragHome extends Fragment {
             // table 이름 써주기 (myCases2 대신 다른 이름)
             Cursor curCSV = db.rawQuery("SELECT * FROM seeds_api_TBL", null);
 
-            csvWrite.writeNext(curCSV.getColumnNames());
+            //csvWrite.writeNext(curCSV.getColumnNames());
             Log.d("curCSV", curCSV.getColumnNames().toString());
 
             curCSV.moveToNext();
